@@ -33,6 +33,10 @@ struct Opt {
     #[structopt(short = "F", long = "freq")]
     frequency: Option<u32>,
 
+    /// Wait msecs before measuring
+    #[structopt(long = "delay")]
+    delay: Option<u32>,
+
     trailing_arguments: Vec<String>,
 }
 
@@ -74,6 +78,7 @@ fn main() {
         &flamegraph_filename,
         opt.root,
         opt.frequency,
+        opt.delay,
     );
 
     if opt.open {

@@ -46,6 +46,7 @@ mod arch {
         workload: Workload,
         sudo: bool,
         freq: Option<u32>,
+        delay: Option<u32>,
     ) -> Command {
         let mut command = if sudo {
             let mut c = Command::new("sudo");
@@ -62,6 +63,11 @@ mod arch {
 
         for arg in args.split_whitespace() {
             command.arg(arg);
+        }
+
+        if let Some(delay) = delay {
+            command.arg("-D");
+            command.arg(delay.to_string());
         }
 
         match workload {
@@ -100,7 +106,10 @@ mod arch {
         workload: Workload,
         sudo: bool,
         freq: Option<u32>,
+        delay: Option<u32>,
     ) -> Command {
+        assert!(delay.is_none(), "delay is not supported for non-linux");
+
         let mut command = if sudo {
             let mut c = Command::new("sudo");
             c.arg("dtrace");
@@ -185,6 +194,7 @@ pub fn generate_flamegraph_for_workload<
     flamegraph_filename: P,
     sudo: bool,
     freq: Option<u32>,
+    delay: Option<u32>,
 ) {
     // Handle SIGINT with an empty handler. This has the
     // implicit effect of allowing the signal to reach the
@@ -199,7 +209,7 @@ pub fn generate_flamegraph_for_workload<
     };
 
     let mut command =
-        arch::initial_command(workload, sudo, freq);
+        arch::initial_command(workload, sudo, freq, delay);
 
     let mut recorder =
         command.spawn().expect(arch::SPAWN_ERROR);
